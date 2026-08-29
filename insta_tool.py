@@ -148,6 +148,13 @@ def calculate_average_interactions(likes, comments, posts):
     return interactions / posts
 
 
+def calculate_interaction_rate(interactions, reach):
+    if reach == 0:
+        return 0.0
+
+    return (interactions / reach) * 100
+
+
 def determine_post_performance(engagement_rate):
     if engagement_rate >= 10:
         return "Excellent"
@@ -174,6 +181,68 @@ def get_post_recommendation(performance):
     return (
         "Engagement is low. Consider improving the content "
         "hook, topic, caption, and call to action."
+    )
+
+
+def identify_strongest_interaction(
+    likes,
+    comments,
+    shares,
+    saves
+):
+    interactions = {
+        "Likes": likes,
+        "Comments": comments,
+        "Shares": shares,
+        "Saves": saves
+    }
+
+    strongest = max(interactions, key=interactions.get)
+
+    return strongest, interactions[strongest]
+
+
+def generate_content_insight(
+    likes,
+    comments,
+    shares,
+    saves
+):
+    strongest, value = identify_strongest_interaction(
+        likes,
+        comments,
+        shares,
+        saves
+    )
+
+    if value == 0:
+        return (
+            "No significant interactions were recorded. "
+            "Consider improving the content topic, hook, "
+            "caption, and call to action."
+        )
+
+    if strongest == "Saves":
+        return (
+            "Saves are the strongest interaction. Consider "
+            "creating more educational, useful, or reference-style content."
+        )
+
+    if strongest == "Shares":
+        return (
+            "Shares are the strongest interaction. Consider "
+            "creating more relatable, entertaining, or highly shareable content."
+        )
+
+    if strongest == "Comments":
+        return (
+            "Comments are the strongest interaction. Consider "
+            "using questions and discussion-focused captions."
+        )
+
+    return (
+        "Likes are the strongest interaction. Continue testing "
+        "strong visual content and engaging topics."
     )
 
 
@@ -221,9 +290,9 @@ def display_account_metrics(
     print("ACCOUNT METRICS")
     print("=" * 50)
 
-    print(f"Average Likes/Post:   {average_likes:.2f}")
-    print(f"Average Comments/Post:{average_comments:.2f}")
-    print(f"Average Interactions: {average_interactions:.2f}")
+    print(f"Average Likes/Post:    {average_likes:.2f}")
+    print(f"Average Comments/Post: {average_comments:.2f}")
+    print(f"Average Interactions:  {average_interactions:.2f}")
 
     print("=" * 50)
 
@@ -239,6 +308,26 @@ def display_post_analysis(
     performance
 ):
     total_interactions = likes + comments + shares + saves
+
+    like_rate = calculate_interaction_rate(
+        likes,
+        reach
+    )
+
+    comment_rate = calculate_interaction_rate(
+        comments,
+        reach
+    )
+
+    share_rate = calculate_interaction_rate(
+        shares,
+        reach
+    )
+
+    save_rate = calculate_interaction_rate(
+        saves,
+        reach
+    )
 
     print()
     print("=" * 50)
@@ -262,10 +351,32 @@ def display_post_analysis(
     print(f"Performance:        {performance}")
 
     print()
+    print("INTERACTION RATES")
+    print("-" * 30)
+
+    print(f"Like Rate:          {like_rate:.2f}%")
+    print(f"Comment Rate:       {comment_rate:.2f}%")
+    print(f"Share Rate:         {share_rate:.2f}%")
+    print(f"Save Rate:          {save_rate:.2f}%")
+
+    print()
     print("RECOMMENDATION")
     print("-" * 30)
 
     print(get_post_recommendation(performance))
+
+    print()
+    print("CONTENT INSIGHT")
+    print("-" * 30)
+
+    print(
+        generate_content_insight(
+            likes,
+            comments,
+            shares,
+            saves
+        )
+    )
 
     print("=" * 50)
 
