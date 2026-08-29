@@ -3,46 +3,31 @@
 """
 Instagram Growth & Analytics Toolkit
 
-Purpose:
-    A learning-focused toolkit for Instagram analytics
-    and ethical audience-growth planning.
+A command-line toolkit for analyzing Instagram performance
+and generating ethical, data-driven growth recommendations.
 
-Features:
-    - Account analysis
-    - Post analysis
-    - Post comparison
-    - Account growth tracking
-    - Growth strategy recommendations
-    - Text report generation
-
-Version: 0.1
+This project is intended for educational purposes and
+legitimate social-media analytics.
 """
 
 import argparse
+import os
 from datetime import datetime
-from pathlib import Path
 
 
-TOOL_NAME = "Instagram Growth & Analytics Toolkit"
-VERSION = "0.1"
-
-REPORTS_DIR = Path("reports")
+VERSION = "0.2"
 
 
 # ============================================================
-# DISPLAY
+# GENERAL FUNCTIONS
 # ============================================================
 
 def display_banner():
     print("=" * 50)
-    print(TOOL_NAME)
+    print("Instagram Growth & Analytics Toolkit")
     print(f"Version: {VERSION}")
     print("=" * 50)
 
-
-# ============================================================
-# INPUT VALIDATION
-# ============================================================
 
 def get_non_negative_integer(prompt):
     while True:
@@ -59,18 +44,53 @@ def get_non_negative_integer(prompt):
             print("[-] Please enter a valid number")
 
 
+def get_positive_integer(prompt):
+    while True:
+        try:
+            value = int(input(prompt))
+
+            if value <= 0:
+                print("[-] Value must be greater than zero")
+                continue
+
+            return value
+
+        except ValueError:
+            print("[-] Please enter a valid number")
+
+
 def get_account_name():
     while True:
-        account_name = input("Account name: ").strip()
+        name = input("Account name: ").strip()
 
-        if not account_name:
+        if not name:
             print("[-] Account name cannot be empty")
             continue
 
-        return account_name
+        return name
 
 
-def get_account_information():
+def save_report(filename, content):
+    os.makedirs("reports", exist_ok=True)
+
+    filepath = os.path.join("reports", filename)
+
+    try:
+        with open(filepath, "w", encoding="utf-8") as file:
+            file.write(content)
+
+        print()
+        print(f"[+] Report saved: {filepath}")
+
+    except OSError as error:
+        print(f"[-] Could not save report: {error}")
+
+
+# ============================================================
+# ACCOUNT ANALYSIS
+# ============================================================
+
+def analyze_account():
     print()
     print("Account Information")
     print("-" * 30)
@@ -83,172 +103,91 @@ def get_account_information():
     likes = get_non_negative_integer("Likes: ")
     comments = get_non_negative_integer("Comments: ")
 
-    return {
-        "account_name": account_name,
-        "followers": followers,
-        "following": following,
-        "posts": posts,
-        "likes": likes,
-        "comments": comments
-    }
-
-
-def get_post_information():
-    print()
-    print("Post Performance Analysis")
-    print("-" * 30)
-
-    while True:
-        post_title = input("Post title: ").strip()
-
-        if not post_title:
-            print("[-] Post title cannot be empty")
-            continue
-
-        break
-
-    likes = get_non_negative_integer("Likes: ")
-    comments = get_non_negative_integer("Comments: ")
-    shares = get_non_negative_integer("Shares: ")
-    saves = get_non_negative_integer("Saves: ")
-    reach = get_non_negative_integer("Reach: ")
-
-    return {
-        "title": post_title,
-        "likes": likes,
-        "comments": comments,
-        "shares": shares,
-        "saves": saves,
-        "reach": reach
-    }
-
-
-# ============================================================
-# ACCOUNT ANALYSIS
-# ============================================================
-
-def calculate_account_engagement_rate(
-    followers,
-    likes,
-    comments
-):
-    if followers == 0:
-        return 0.0
-
-    interactions = likes + comments
-
-    return (interactions / followers) * 100
-
-
-def calculate_average_likes(likes, posts):
-    if posts == 0:
-        return 0.0
-
-    return likes / posts
-
-
-def calculate_average_comments(comments, posts):
-    if posts == 0:
-        return 0.0
-
-    return comments / posts
-
-
-def calculate_average_interactions(
-    likes,
-    comments,
-    posts
-):
-    if posts == 0:
-        return 0.0
-
-    return (likes + comments) / posts
-
-
-def analyze_account():
-    account = get_account_information()
-
-    engagement_rate = calculate_account_engagement_rate(
-        account["followers"],
-        account["likes"],
-        account["comments"]
-    )
-
-    average_likes = calculate_average_likes(
-        account["likes"],
-        account["posts"]
-    )
-
-    average_comments = calculate_average_comments(
-        account["comments"],
-        account["posts"]
-    )
-
-    average_interactions = calculate_average_interactions(
-        account["likes"],
-        account["comments"],
-        account["posts"]
-    )
-
     print()
     print("=" * 50)
     print("ACCOUNT INFORMATION")
     print("=" * 50)
 
-    print(
-        f"Account:              "
-        f"{account['account_name']}"
-    )
+    print(f"Account:              {account_name}")
+    print(f"Followers:            {followers}")
+    print(f"Following:            {following}")
+    print(f"Posts:                {posts}")
+    print(f"Likes:                {likes}")
+    print(f"Comments:             {comments}")
 
-    print(
-        f"Followers:            "
-        f"{account['followers']}"
-    )
+    # Account engagement estimate
+    if followers > 0:
+        engagement_rate = (
+            (likes + comments) / followers
+        ) * 100
+    else:
+        engagement_rate = 0.0
 
-    print(
-        f"Following:            "
-        f"{account['following']}"
-    )
+    print()
+    print("=" * 50)
+    print("ENGAGEMENT ANALYSIS")
+    print("=" * 50)
 
-    print(
-        f"Posts:                "
-        f"{account['posts']}"
-    )
+    print(f"Engagement Rate:      {engagement_rate:.2f}%")
 
-    print(
-        f"Likes:                "
-        f"{account['likes']}"
-    )
-
-    print(
-        f"Comments:             "
-        f"{account['comments']}"
-    )
+    # Average performance
+    if posts > 0:
+        average_likes = likes / posts
+        average_comments = comments / posts
+        average_interactions = (
+            likes + comments
+        ) / posts
+    else:
+        average_likes = 0
+        average_comments = 0
+        average_interactions = 0
 
     print()
     print("=" * 50)
     print("ACCOUNT ANALYSIS")
     print("=" * 50)
 
-    print(
-        f"Engagement Rate:      "
-        f"{engagement_rate:.2f}%"
-    )
+    print(f"Average Likes/Post:   {average_likes:.2f}")
+    print(f"Average Comments/Post:{average_comments:.2f}")
+    print(f"Average Interactions: {average_interactions:.2f}")
 
-    print(
-        f"Average Likes/Post:   "
-        f"{average_likes:.2f}"
-    )
+    # Recommendations
+    print()
+    print("=" * 50)
+    print("ACCOUNT RECOMMENDATIONS")
+    print("=" * 50)
 
-    print(
-        f"Average Comments/Post:"
-        f" {average_comments:.2f}"
-    )
+    if engagement_rate >= 10:
+        print("[+] Engagement is strong.")
+        print(
+            "Continue studying your best-performing "
+            "content and repeat successful themes."
+        )
 
-    print(
-        f"Average Interactions: "
-        f"{average_interactions:.2f}"
-    )
+    elif engagement_rate >= 3:
+        print("[+] Engagement is moderate.")
+        print(
+            "Experiment with stronger hooks, useful topics, "
+            "and clearer calls to action."
+        )
+
+    else:
+        print("[-] Engagement is low.")
+        print(
+            "Focus on improving content value, hooks, "
+            "consistency, and audience interaction."
+        )
+
+    if following > followers:
+        print()
+        print(
+            "[!] You are following more accounts than "
+            "you have followers."
+        )
+        print(
+            "Focus on creating discoverable content "
+            "and attracting relevant followers."
+        )
 
     print("=" * 50)
 
@@ -257,236 +196,84 @@ def analyze_account():
 # POST ANALYSIS
 # ============================================================
 
-def calculate_post_engagement_rate(post):
-    if post["reach"] == 0:
-        return 0.0
+def analyze_post():
+    print()
+    print("Post Performance Analysis")
+    print("-" * 30)
 
-    interactions = (
-        post["likes"]
-        + post["comments"]
-        + post["shares"]
-        + post["saves"]
+    title = input("Post title: ").strip()
+
+    if not title:
+        print("[-] Post title cannot be empty")
+        return
+
+    likes = get_non_negative_integer("Likes: ")
+    comments = get_non_negative_integer("Comments: ")
+    shares = get_non_negative_integer("Shares: ")
+    saves = get_non_negative_integer("Saves: ")
+    reach = get_non_negative_integer("Reach: ")
+
+    total_interactions = (
+        likes +
+        comments +
+        shares +
+        saves
     )
 
-    return (
-        interactions
-        / post["reach"]
-    ) * 100
+    if reach > 0:
+        engagement_rate = (
+            total_interactions / reach
+        ) * 100
+    else:
+        engagement_rate = 0.0
 
-
-def calculate_interaction_rate(
-    interaction,
-    reach
-):
-    if reach == 0:
-        return 0.0
-
-    return (interaction / reach) * 100
-
-
-def determine_post_performance(
-    engagement_rate
-):
     if engagement_rate >= 10:
-        return "Excellent"
-
-    if engagement_rate >= 5:
-        return "Moderate"
-
-    return "Needs Improvement"
-
-
-def get_post_recommendation(
-    performance
-):
-    if performance == "Excellent":
-        return (
+        performance = "Excellent"
+        recommendation = (
             "Excellent engagement. Keep creating "
             "content similar to this post."
         )
 
-    if performance == "Moderate":
-        return (
+    elif engagement_rate >= 3:
+        performance = "Moderate"
+        recommendation = (
             "Moderate engagement. Experiment with "
             "stronger hooks, captions, and calls to action."
         )
 
-    return (
-        "Engagement is low. Consider improving the "
-        "content hook, topic, caption, and call to action."
-    )
-
-
-def identify_strongest_interaction(post):
-    interactions = {
-        "Likes": post["likes"],
-        "Comments": post["comments"],
-        "Shares": post["shares"],
-        "Saves": post["saves"]
-    }
-
-    strongest = max(
-        interactions,
-        key=interactions.get
-    )
-
-    return strongest, interactions[strongest]
-
-
-def generate_content_insight(post):
-    strongest, value = identify_strongest_interaction(
-        post
-    )
-
-    if value == 0:
-        return (
-            "No significant interactions were recorded. "
-            "Consider improving the content topic, hook, "
-            "caption, and call to action."
+    else:
+        performance = "Needs Improvement"
+        recommendation = (
+            "Engagement is low. Consider improving "
+            "the content hook, topic, caption, "
+            "and call to action."
         )
-
-    if strongest == "Saves":
-        return (
-            "Saves are the strongest interaction. "
-            "Consider creating more educational, useful, "
-            "or reference-style content."
-        )
-
-    if strongest == "Shares":
-        return (
-            "Shares are the strongest interaction. "
-            "Consider creating more relatable, entertaining, "
-            "or highly shareable content."
-        )
-
-    if strongest == "Comments":
-        return (
-            "Comments are the strongest interaction. "
-            "Consider using questions and discussion-focused "
-            "captions."
-        )
-
-    return (
-        "Likes are the strongest interaction. "
-        "Continue testing strong visual content and "
-        "engaging topics."
-    )
-
-
-def analyze_post():
-    post = get_post_information()
-
-    engagement_rate = (
-        calculate_post_engagement_rate(post)
-    )
-
-    performance = determine_post_performance(
-        engagement_rate
-    )
-
-    total_interactions = (
-        post["likes"]
-        + post["comments"]
-        + post["shares"]
-        + post["saves"]
-    )
 
     print()
     print("=" * 50)
     print("POST PERFORMANCE")
     print("=" * 50)
 
-    print(
-        f"Post:               "
-        f"{post['title']}"
-    )
-
-    print(
-        f"Likes:              "
-        f"{post['likes']}"
-    )
-
-    print(
-        f"Comments:           "
-        f"{post['comments']}"
-    )
-
-    print(
-        f"Shares:             "
-        f"{post['shares']}"
-    )
-
-    print(
-        f"Saves:              "
-        f"{post['saves']}"
-    )
-
-    print(
-        f"Reach:              "
-        f"{post['reach']}"
-    )
-
-    print(
-        f"Total Interactions: "
-        f"{total_interactions}"
-    )
+    print(f"Post:               {title}")
+    print(f"Likes:              {likes}")
+    print(f"Comments:           {comments}")
+    print(f"Shares:             {shares}")
+    print(f"Saves:              {saves}")
+    print(f"Reach:              {reach}")
+    print(f"Total Interactions: {total_interactions}")
 
     print()
     print("=" * 50)
     print("POST ANALYSIS")
     print("=" * 50)
 
-    print(
-        f"Engagement Rate:    "
-        f"{engagement_rate:.2f}%"
-    )
-
-    print(
-        f"Performance:        "
-        f"{performance}"
-    )
-
-    print()
-    print("INTERACTION RATES")
-    print("-" * 30)
-
-    print(
-        f"Like Rate:          "
-        f"{calculate_interaction_rate(post['likes'], post['reach']):.2f}%"
-    )
-
-    print(
-        f"Comment Rate:       "
-        f"{calculate_interaction_rate(post['comments'], post['reach']):.2f}%"
-    )
-
-    print(
-        f"Share Rate:         "
-        f"{calculate_interaction_rate(post['shares'], post['reach']):.2f}%"
-    )
-
-    print(
-        f"Save Rate:          "
-        f"{calculate_interaction_rate(post['saves'], post['reach']):.2f}%"
-    )
+    print(f"Engagement Rate:    {engagement_rate:.2f}%")
+    print(f"Performance:        {performance}")
 
     print()
     print("RECOMMENDATION")
     print("-" * 30)
-
-    print(
-        get_post_recommendation(
-            performance
-        )
-    )
-
-    print()
-    print("CONTENT INSIGHT")
-    print("-" * 30)
-
-    print(
-        generate_content_insight(post)
-    )
+    print(recommendation)
 
     print("=" * 50)
 
@@ -495,138 +282,105 @@ def analyze_post():
 # POST COMPARISON
 # ============================================================
 
-def collect_comparison_post(number):
-    print()
-    print(f"POST {number}")
-    print("-" * 30)
-
-    post = get_post_information()
-
-    post["engagement_rate"] = (
-        calculate_post_engagement_rate(post)
-    )
-
-    post["interactions"] = (
-        post["likes"]
-        + post["comments"]
-        + post["shares"]
-        + post["saves"]
-    )
-
-    post["performance"] = (
-        determine_post_performance(
-            post["engagement_rate"]
-        )
-    )
-
-    return post
-
-
 def compare_posts():
     print()
-    print("Multiple Post Comparison")
+    print("Post Comparison")
     print("-" * 30)
 
-    number_of_posts = get_non_negative_integer(
+    number_of_posts = get_positive_integer(
         "Number of posts to compare: "
     )
 
-    if number_of_posts == 0:
-        print("[-] At least one post is required")
-        return
-
     posts = []
 
-    for number in range(
-        1,
-        number_of_posts + 1
-    ):
-        posts.append(
-            collect_comparison_post(number)
+    for number in range(1, number_of_posts + 1):
+        print()
+        print(f"Post {number}")
+        print("-" * 20)
+
+        title = input("Post title: ").strip()
+
+        if not title:
+            title = f"Post {number}"
+
+        likes = get_non_negative_integer("Likes: ")
+        comments = get_non_negative_integer("Comments: ")
+        shares = get_non_negative_integer("Shares: ")
+        saves = get_non_negative_integer("Saves: ")
+        reach = get_non_negative_integer("Reach: ")
+
+        interactions = (
+            likes +
+            comments +
+            shares +
+            saves
         )
 
+        if reach > 0:
+            engagement_rate = (
+                interactions / reach
+            ) * 100
+        else:
+            engagement_rate = 0.0
+
+        posts.append({
+            "title": title,
+            "likes": likes,
+            "comments": comments,
+            "shares": shares,
+            "saves": saves,
+            "reach": reach,
+            "interactions": interactions,
+            "engagement_rate": engagement_rate
+        })
+
     print()
-    print("=" * 80)
+    print("=" * 75)
     print("POST COMPARISON")
-    print("=" * 80)
+    print("=" * 75)
 
-    print(
-        f"{'POST':<25}"
-        f"{'REACH':<10}"
-        f"{'INTERACTIONS':<15}"
-        f"{'ENGAGEMENT':<15}"
-        f"{'PERFORMANCE':<15}"
-    )
-
-    print("-" * 80)
-
-    for post in posts:
+    for index, post in enumerate(posts, start=1):
+        print()
+        print(f"Post {index}: {post['title']}")
+        print(f"Likes:              {post['likes']}")
+        print(f"Comments:           {post['comments']}")
+        print(f"Shares:             {post['shares']}")
+        print(f"Saves:              {post['saves']}")
+        print(f"Reach:              {post['reach']}")
+        print(f"Interactions:       {post['interactions']}")
         print(
-            f"{post['title'][:24]:<25}"
-            f"{post['reach']:<10}"
-            f"{post['interactions']:<15}"
-            f"{post['engagement_rate']:<15.2f}"
-            f"{post['performance']:<15}"
+            f"Engagement Rate:    "
+            f"{post['engagement_rate']:.2f}%"
         )
 
-    print("=" * 80)
-
-    best_post = max(
-        posts,
-        key=lambda item: item["engagement_rate"]
-    )
-
-    average_engagement = (
-        sum(
-            post["engagement_rate"]
-            for post in posts
+    if posts:
+        best_post = max(
+            posts,
+            key=lambda post: post["engagement_rate"]
         )
-        / len(posts)
-    )
 
-    print()
-    print("COMPARISON SUMMARY")
-    print("-" * 30)
+        print()
+        print("=" * 75)
+        print("BEST PERFORMING POST")
+        print("=" * 75)
 
-    print(
-        f"Posts Compared:       "
-        f"{len(posts)}"
-    )
+        print(f"Post: {best_post['title']}")
+        print(
+            f"Engagement Rate: "
+            f"{best_post['engagement_rate']:.2f}%"
+        )
 
-    print(
-        f"Average Engagement:   "
-        f"{average_engagement:.2f}%"
-    )
+        print()
+        print(
+            "[+] Study this post's topic, format, "
+            "hook, and audience response."
+        )
 
-    print(
-        f"Best Performing Post: "
-        f"{best_post['title']}"
-    )
-
-    print(
-        f"Best Engagement Rate: "
-        f"{best_post['engagement_rate']:.2f}%"
-    )
-
-    print()
-    print("CONTENT INSIGHT")
-    print("-" * 30)
-
-    print(
-        f"'{best_post['title']}' generated the "
-        "highest engagement rate."
-    )
-
-    print(
-        "Consider studying its topic, format, "
-        "hook, caption, and audience response."
-    )
-
-    print("=" * 80)
+    print("=" * 75)
 
 
 # ============================================================
-# ACCOUNT GROWTH TRACKING
+# GROWTH TRACKING
 # ============================================================
 
 def track_growth():
@@ -634,24 +388,10 @@ def track_growth():
     print("Account Growth Tracking")
     print("-" * 30)
 
-    print()
-    print("Starting Metrics")
-    print("-" * 30)
-
-    starting_followers = get_non_negative_integer(
-        "Starting followers: "
-    )
-
-    starting_following = get_non_negative_integer(
-        "Starting following: "
-    )
-
-    starting_posts = get_non_negative_integer(
-        "Starting posts: "
-    )
+    account_name = get_account_name()
 
     print()
-    print("Current Metrics")
+    print("CURRENT ACCOUNT")
     print("-" * 30)
 
     current_followers = get_non_negative_integer(
@@ -666,160 +406,129 @@ def track_growth():
         "Current posts: "
     )
 
+    print()
+    print("PREVIOUS ACCOUNT")
+    print("-" * 30)
+
+    previous_followers = get_non_negative_integer(
+        "Previous followers: "
+    )
+
+    previous_following = get_non_negative_integer(
+        "Previous following: "
+    )
+
+    previous_posts = get_non_negative_integer(
+        "Previous posts: "
+    )
+
     follower_change = (
-        current_followers
-        - starting_followers
+        current_followers - previous_followers
     )
 
     following_change = (
-        current_following
-        - starting_following
+        current_following - previous_following
     )
 
     post_change = (
-        current_posts
-        - starting_posts
+        current_posts - previous_posts
     )
 
-    if starting_followers == 0:
-        follower_growth_rate = 0.0
-    else:
+    if previous_followers > 0:
         follower_growth_rate = (
-            follower_change
-            / starting_followers
+            follower_change /
+            previous_followers
         ) * 100
-
-    if starting_posts == 0:
-        post_growth_rate = 0.0
     else:
+        follower_growth_rate = 0.0
+
+    if previous_posts > 0:
         post_growth_rate = (
-            post_change
-            / starting_posts
+            post_change /
+            previous_posts
         ) * 100
+    else:
+        post_growth_rate = 0.0
 
     print()
-    print("=" * 50)
-    print("ACCOUNT GROWTH ANALYSIS")
-    print("=" * 50)
+    print("=" * 60)
+    print("ACCOUNT GROWTH REPORT")
+    print("=" * 60)
 
-    print(
-        f"Follower Change:     "
-        f"{follower_change:+d}"
-    )
+    print(f"Account:              {account_name}")
 
+    print()
+    print("FOLLOWERS")
+    print("-" * 30)
+    print(f"Previous:             {previous_followers}")
+    print(f"Current:              {current_followers}")
+    print(f"Change:               {follower_change:+d}")
     print(
-        f"Follower Growth:     "
+        f"Growth Rate:          "
         f"{follower_growth_rate:+.2f}%"
     )
 
-    print(
-        f"Following Change:    "
-        f"{following_change:+d}"
-    )
+    print()
+    print("FOLLOWING")
+    print("-" * 30)
+    print(f"Previous:             {previous_following}")
+    print(f"Current:              {current_following}")
+    print(f"Change:               {following_change:+d}")
 
+    print()
+    print("POSTS")
+    print("-" * 30)
+    print(f"Previous:             {previous_posts}")
+    print(f"Current:              {current_posts}")
+    print(f"Change:               {post_change:+d}")
     print(
-        f"Post Change:         "
-        f"{post_change:+d}"
-    )
-
-    print(
-        f"Post Growth:         "
+        f"Post Growth Rate:     "
         f"{post_growth_rate:+.2f}%"
     )
 
-    print("=" * 50)
+    print()
+    print("=" * 60)
+    print("GROWTH RECOMMENDATION")
+    print("=" * 60)
 
-    save_growth_report(
-        starting_followers,
-        starting_following,
-        starting_posts,
-        current_followers,
-        current_following,
-        current_posts,
-        follower_change,
-        follower_growth_rate,
-        following_change,
-        post_change,
-        post_growth_rate
-    )
-
-
-def save_growth_report(
-    starting_followers,
-    starting_following,
-    starting_posts,
-    current_followers,
-    current_following,
-    current_posts,
-    follower_change,
-    follower_growth_rate,
-    following_change,
-    post_change,
-    post_growth_rate
-):
-    REPORTS_DIR.mkdir(exist_ok=True)
-
-    timestamp = datetime.now().strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-
-    report = f"""
-==================================================
-INSTAGRAM ACCOUNT GROWTH REPORT
-==================================================
-
-Generated: {timestamp}
-
-STARTING METRICS
-------------------------------
-Followers: {starting_followers}
-Following: {starting_following}
-Posts:     {starting_posts}
-
-CURRENT METRICS
-------------------------------
-Followers: {current_followers}
-Following: {current_following}
-Posts:     {current_posts}
-
-GROWTH ANALYSIS
-------------------------------
-Follower Change:  {follower_change:+d}
-Follower Growth:  {follower_growth_rate:+.2f}%
-
-Following Change: {following_change:+d}
-
-Post Change:      {post_change:+d}
-Post Growth:      {post_growth_rate:+.2f}%
-
-==================================================
-END OF REPORT
-==================================================
-"""
-
-    filename = (
-        "growth_"
-        + datetime.now().strftime(
-            "%Y%m%d_%H%M%S"
+    if follower_change > 0:
+        print(
+            "[+] Your follower count increased."
         )
-        + ".txt"
-    )
+        print(
+            "Continue identifying the content "
+            "responsible for that growth."
+        )
 
-    report_path = REPORTS_DIR / filename
+    elif follower_change == 0:
+        print(
+            "[!] Follower count remained unchanged."
+        )
+        print(
+            "Test new topics, hooks, formats, "
+            "and discoverability techniques."
+        )
 
-    report_path.write_text(
-        report,
-        encoding="utf-8"
-    )
+    else:
+        print(
+            "[-] Follower count decreased."
+        )
+        print(
+            "Review recent content performance "
+            "and audience response."
+        )
 
     print()
     print(
-        f"[+] Report saved to: {report_path}"
+        "[+] Focus on genuine audience growth "
+        "rather than artificial followers."
     )
+
+    print("=" * 60)
 
 
 # ============================================================
-# GROWTH STRATEGY ENGINE
+# GROWTH STRATEGY
 # ============================================================
 
 def growth_strategy():
@@ -829,200 +538,108 @@ def growth_strategy():
 
     account_name = get_account_name()
 
-    followers = get_non_negative_integer(
-        "Followers: "
-    )
-
-    following = get_non_negative_integer(
-        "Following: "
-    )
-
-    posts = get_non_negative_integer(
-        "Posts: "
-    )
-
+    followers = get_non_negative_integer("Followers: ")
+    following = get_non_negative_integer("Following: ")
+    posts = get_non_negative_integer("Posts: ")
     average_likes = get_non_negative_integer(
         "Average likes per post: "
     )
-
     average_comments = get_non_negative_integer(
         "Average comments per post: "
     )
 
+    if followers > 0:
+        estimated_engagement = (
+            (average_likes + average_comments)
+            / followers
+        ) * 100
+    else:
+        estimated_engagement = 0.0
+
     print()
-    print("=" * 50)
+    print("=" * 60)
     print("INSTAGRAM GROWTH STRATEGY")
-    print("=" * 50)
+    print("=" * 60)
 
-    print(
-        f"Account:              {account_name}"
-    )
-
-    print(
-        f"Followers:            {followers}"
-    )
-
-    print(
-        f"Following:            {following}"
-    )
-
-    print(
-        f"Posts:                {posts}"
-    )
-
-    print(
-        f"Average Likes/Post:   {average_likes}"
-    )
-
-    print(
-        f"Average Comments/Post:"
-        f" {average_comments}"
-    )
+    print(f"Account:              {account_name}")
+    print(f"Followers:            {followers}")
+    print(f"Following:            {following}")
+    print(f"Posts:                {posts}")
+    print(f"Average Likes/Post:   {average_likes}")
+    print(f"Average Comments/Post: {average_comments}")
 
     print()
-    print("=" * 50)
+    print("=" * 60)
     print("GROWTH RECOMMENDATIONS")
-    print("=" * 50)
-
-    # --------------------------------------------------------
-    # CONTENT
-    # --------------------------------------------------------
+    print("=" * 60)
 
     print()
     print("[+] CONTENT")
 
-    if average_likes == 0:
+    if average_likes > 0:
         print(
-            "Focus on creating useful and relevant content "
-            "that gives people a reason to engage."
-        )
-
-    elif followers > 0 and average_likes < (
-        followers * 0.05
-    ):
-        print(
-            "Average likes are relatively low compared "
-            "with your follower count."
-        )
-
-        print(
-            "Test stronger hooks, visuals, topics, "
-            "captions, and content formats."
-        )
-
-    else:
-        print(
-            "Your content is generating reasonable "
+            "Your content is generating measurable "
             "engagement."
         )
-
         print(
             "Study your strongest posts and create "
             "more content around similar topics."
         )
-
-    # --------------------------------------------------------
-    # ENGAGEMENT
-    # --------------------------------------------------------
+    else:
+        print(
+            "Start testing different content topics "
+            "and formats."
+        )
 
     print()
     print("[+] ENGAGEMENT")
 
-    if average_comments < 5:
-        print(
-            "Encourage meaningful conversations by "
-            "asking questions in your captions."
-        )
-
-    else:
+    if average_comments > 0:
         print(
             "Your content is generating conversations."
         )
-
         print(
             "Continue using discussion-focused content."
         )
-
-    # --------------------------------------------------------
-    # CONSISTENCY
-    # --------------------------------------------------------
+    else:
+        print(
+            "Use questions and discussion prompts "
+            "to encourage genuine conversations."
+        )
 
     print()
     print("[+] CONSISTENCY")
 
-    if posts < 10:
-        print(
-            "Build a consistent content library before "
-            "judging long-term growth."
-        )
-
-    elif posts < 30:
-        print(
-            "You are building a content history."
-        )
-
-        print(
-            "Continue posting consistently and track "
-            "which topics perform best."
-        )
-
-    else:
+    if posts >= 20:
         print(
             "You have enough content to identify "
             "performance patterns."
         )
-
         print(
             "Review your strongest posts regularly."
         )
-
-    # --------------------------------------------------------
-    # AUDIENCE
-    # --------------------------------------------------------
-
-    print()
-    print("[+] AUDIENCE")
-
-    if followers == 0:
-        print(
-            "Define a specific target audience and "
-            "create content that solves their problems "
-            "or provides useful information."
-        )
-
-    elif following > followers:
-        print(
-            "Your following count is higher than your "
-            "follower count."
-        )
-
-        print(
-            "Focus more on discoverable, valuable content "
-            "rather than simply following more accounts."
-        )
-
     else:
         print(
-            "Continue creating content that provides "
-            "clear value to your target audience."
+            "Build a consistent publishing habit "
+            "so you can collect more performance data."
         )
-
-    # --------------------------------------------------------
-    # DISCOVERY
-    # --------------------------------------------------------
 
     print()
     print("[+] DISCOVERY")
 
     print(
         "Use relevant topics, searchable keywords, "
-        "appropriate hashtags, and strong opening hooks "
-        "to improve content discoverability."
+        "appropriate hashtags, and strong opening "
+        "hooks to improve discoverability."
     )
 
-    # --------------------------------------------------------
-    # GROWTH
-    # --------------------------------------------------------
+    print()
+    print("[+] AUDIENCE")
+
+    print(
+        "Create content specifically for the people "
+        "you want to attract."
+    )
 
     print()
     print("[+] GROWTH")
@@ -1043,16 +660,265 @@ def growth_strategy():
     )
 
     print()
-    print("=" * 50)
+    print(
+        f"Estimated Engagement: "
+        f"{estimated_engagement:.2f}%"
+    )
+
+    print("=" * 60)
 
 
 # ============================================================
-# COMMAND-LINE INTERFACE
+# CONTENT STRATEGY GENERATOR
 # ============================================================
 
-def main():
+def content_strategy():
+    print()
+    print("Content Strategy Generator")
+    print("-" * 30)
+
+    while True:
+        niche = input("Your niche/topic: ").strip()
+
+        if not niche:
+            print("[-] Niche cannot be empty")
+            continue
+
+        break
+
+    while True:
+        audience = input("Target audience: ").strip()
+
+        if not audience:
+            print("[-] Target audience cannot be empty")
+            continue
+
+        break
+
+    print()
+    print("Growth Goal")
+    print("-" * 30)
+
+    print("1. Increase followers")
+    print("2. Increase engagement")
+    print("3. Build authority")
+    print("4. Generate leads")
+
+    while True:
+        goal_choice = input(
+            "Choose a goal (1-4): "
+        ).strip()
+
+        if goal_choice in ("1", "2", "3", "4"):
+            break
+
+        print("[-] Please choose 1, 2, 3, or 4")
+
+    goals = {
+        "1": "Increase followers",
+        "2": "Increase engagement",
+        "3": "Build authority",
+        "4": "Generate leads"
+    }
+
+    goal = goals[goal_choice]
+
+    posting_frequency = get_non_negative_integer(
+        "Posts per week: "
+    )
+
+    print()
+    print("=" * 60)
+    print("CONTENT GROWTH STRATEGY")
+    print("=" * 60)
+
+    print(f"Niche:             {niche}")
+    print(f"Target Audience:   {audience}")
+    print(f"Primary Goal:      {goal}")
+    print(f"Posts Per Week:    {posting_frequency}")
+
+    print()
+    print("=" * 60)
+    print("CONTENT PILLARS")
+    print("=" * 60)
+
+    print()
+    print("1. EDUCATIONAL CONTENT")
+    print("-" * 30)
+
+    print(
+        f"Create useful posts that teach your audience "
+        f"something related to {niche}."
+    )
+
+    print()
+    print("2. PROBLEM-SOLVING CONTENT")
+    print("-" * 30)
+
+    print(
+        f"Identify common problems faced by {audience} "
+        f"and create practical solutions."
+    )
+
+    print()
+    print("3. EXPERIENCE / STORY CONTENT")
+    print("-" * 30)
+
+    print(
+        "Share lessons learned, mistakes, progress, "
+        "experiences, and behind-the-scenes content."
+    )
+
+    print()
+    print("4. ENGAGEMENT CONTENT")
+    print("-" * 30)
+
+    print(
+        "Use questions, opinions, comparisons, and "
+        "discussion topics to encourage conversations."
+    )
+
+    print()
+    print("=" * 60)
+    print("CONTENT FORMATS")
+    print("=" * 60)
+
+    print()
+    print("- Short-form videos / Reels")
+    print("- Educational carousel posts")
+    print("- Tutorials and step-by-step posts")
+    print("- Progress or case-study posts")
+    print("- Questions and discussion posts")
+    print("- Personal experience / story posts")
+
+    print()
+    print("=" * 60)
+    print("HOOK IDEAS")
+    print("=" * 60)
+
+    print()
+    print(
+        f'1. "5 things I wish I knew about {niche}"'
+    )
+
+    print(
+        f'2. "If you are interested in {niche}, '
+        f'stop doing this..."'
+    )
+
+    print(
+        f'3. "Here is what nobody tells you about {niche}"'
+    )
+
+    print(
+        f'4. "The beginner\'s guide to {niche}"'
+    )
+
+    print(
+        '5. "I tested this so you do not have to"'
+    )
+
+    print()
+    print("=" * 60)
+    print("CALL-TO-ACTION IDEAS")
+    print("=" * 60)
+
+    print()
+    print("1. Ask your audience a question.")
+    print("2. Ask people to share their experience.")
+    print("3. Encourage viewers to save useful posts.")
+    print("4. Encourage people to share valuable content.")
+    print("5. Invite people to follow for more content.")
+
+    print()
+    print("=" * 60)
+    print("WEEKLY CONTENT PLAN")
+    print("=" * 60)
+
+    if posting_frequency == 0:
+        print(
+            "Set a realistic posting schedule and "
+            "start tracking your results."
+        )
+
+    else:
+        content_types = [
+            "Educational",
+            "Problem-solving",
+            "Story / Experience",
+            "Engagement",
+            "Tutorial",
+            "Reel / Short-form Video",
+            "Community / Discussion"
+        ]
+
+        for day in range(1, posting_frequency + 1):
+            content_type = content_types[
+                (day - 1) % len(content_types)
+            ]
+
+            print(
+                f"Post {day}: {content_type} content"
+            )
+
+    print()
+    print("=" * 60)
+    print("GROWTH PRINCIPLES")
+    print("=" * 60)
+
+    print()
+    print(
+        "• Create content for a specific audience."
+    )
+
+    print(
+        "• Focus on providing value before asking "
+        "for engagement."
+    )
+
+    print(
+        "• Study which posts perform best."
+    )
+
+    print(
+        "• Repeat successful content themes."
+    )
+
+    print(
+        "• Test different hooks and formats."
+    )
+
+    print(
+        "• Respond to genuine comments and conversations."
+    )
+
+    print(
+        "• Track follower growth over time."
+    )
+
+    print()
+    print(
+        "[+] Strategy generated successfully."
+    )
+
+    print("=" * 60)
+
+
+# ============================================================
+# REPORT INFORMATION
+# ============================================================
+
+def show_version():
+    print(f"insta_tool.py {VERSION}")
+
+
+# ============================================================
+# COMMAND LINE INTERFACE
+# ============================================================
+
+def create_parser():
     parser = argparse.ArgumentParser(
-        description=TOOL_NAME
+        description="Instagram Growth & Analytics Toolkit"
     )
 
     parser.add_argument(
@@ -1063,43 +929,54 @@ def main():
 
     subparsers = parser.add_subparsers(
         dest="command",
-        help="Available commands"
+        title="Available commands"
     )
 
     # Account analysis
-
     subparsers.add_parser(
         "analyze",
         help="Analyze Instagram account performance"
     )
 
     # Post analysis
-
     subparsers.add_parser(
         "post",
         help="Analyze individual post performance"
     )
 
     # Post comparison
-
     subparsers.add_parser(
         "compare",
         help="Compare multiple posts"
     )
 
-    # Account growth
-
+    # Growth tracking
     subparsers.add_parser(
         "growth",
         help="Track account growth"
     )
 
     # Growth strategy
-
     subparsers.add_parser(
         "strategy",
         help="Generate Instagram growth recommendations"
     )
+
+    # Content strategy
+    subparsers.add_parser(
+        "content",
+        help="Generate a content growth strategy"
+    )
+
+    return parser
+
+
+# ============================================================
+# MAIN
+# ============================================================
+
+def main():
+    parser = create_parser()
 
     args = parser.parse_args()
 
@@ -1120,13 +997,12 @@ def main():
     elif args.command == "strategy":
         growth_strategy()
 
+    elif args.command == "content":
+        content_strategy()
+
     else:
         parser.print_help()
 
-
-# ============================================================
-# PROGRAM ENTRY POINT
-# ============================================================
 
 if __name__ == "__main__":
     main()
