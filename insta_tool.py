@@ -58,38 +58,88 @@ def get_account_information():
     followers = get_non_negative_integer("Followers: ")
     following = get_non_negative_integer("Following: ")
     posts = get_non_negative_integer("Posts: ")
+    likes = get_non_negative_integer("Likes: ")
+    comments = get_non_negative_integer("Comments: ")
 
-    return account_name, followers, following, posts
+    return (
+        account_name,
+        followers,
+        following,
+        posts,
+        likes,
+        comments
+    )
+
+
+def calculate_engagement_rate(followers, likes, comments):
+    if followers == 0:
+        return 0.0
+
+    interactions = likes + comments
+
+    return (interactions / followers) * 100
 
 
 def display_account_information(
     account_name,
     followers,
     following,
-    posts
+    posts,
+    likes,
+    comments
 ):
     print()
     print("=" * 50)
     print("ACCOUNT INFORMATION")
     print("=" * 50)
 
-    print(f"Account:   {account_name}")
-    print(f"Followers: {followers}")
-    print(f"Following: {following}")
-    print(f"Posts:     {posts}")
+    print(f"Account:          {account_name}")
+    print(f"Followers:        {followers}")
+    print(f"Following:        {following}")
+    print(f"Posts:            {posts}")
+    print(f"Likes:            {likes}")
+    print(f"Comments:         {comments}")
+
+    print("=" * 50)
+
+
+def display_engagement_analysis(engagement_rate):
+    print()
+    print("=" * 50)
+    print("ENGAGEMENT ANALYSIS")
+    print("=" * 50)
+
+    print(f"Engagement Rate:  {engagement_rate:.2f}%")
 
     print("=" * 50)
 
 
 def analyze_account():
-    account_name, followers, following, posts = get_account_information()
+    (
+        account_name,
+        followers,
+        following,
+        posts,
+        likes,
+        comments
+    ) = get_account_information()
+
+    engagement_rate = calculate_engagement_rate(
+        followers,
+        likes,
+        comments
+    )
 
     display_account_information(
         account_name,
         followers,
         following,
-        posts
+        posts,
+        likes,
+        comments
     )
+
+    display_engagement_analysis(engagement_rate)
 
 
 def main():
