@@ -309,25 +309,10 @@ def display_post_analysis(
 ):
     total_interactions = likes + comments + shares + saves
 
-    like_rate = calculate_interaction_rate(
-        likes,
-        reach
-    )
-
-    comment_rate = calculate_interaction_rate(
-        comments,
-        reach
-    )
-
-    share_rate = calculate_interaction_rate(
-        shares,
-        reach
-    )
-
-    save_rate = calculate_interaction_rate(
-        saves,
-        reach
-    )
+    like_rate = calculate_interaction_rate(likes, reach)
+    comment_rate = calculate_interaction_rate(comments, reach)
+    share_rate = calculate_interaction_rate(shares, reach)
+    save_rate = calculate_interaction_rate(saves, reach)
 
     print()
     print("=" * 50)
@@ -379,6 +364,145 @@ def display_post_analysis(
     )
 
     print("=" * 50)
+
+
+def compare_posts():
+    print()
+    print("Multiple Post Comparison")
+    print("-" * 30)
+
+    number_of_posts = get_non_negative_integer(
+        "Number of posts to compare: "
+    )
+
+    if number_of_posts == 0:
+        print("[-] At least one post is required")
+        return
+
+    posts = []
+
+    for index in range(1, number_of_posts + 1):
+        print()
+        print(f"POST {index}")
+        print("-" * 30)
+
+        while True:
+            title = input("Post title: ").strip()
+
+            if not title:
+                print("[-] Post title cannot be empty")
+                continue
+
+            break
+
+        likes = get_non_negative_integer("Likes: ")
+        comments = get_non_negative_integer("Comments: ")
+        shares = get_non_negative_integer("Shares: ")
+        saves = get_non_negative_integer("Saves: ")
+        reach = get_non_negative_integer("Reach: ")
+
+        engagement_rate = calculate_post_engagement_rate(
+            likes,
+            comments,
+            shares,
+            saves,
+            reach
+        )
+
+        total_interactions = (
+            likes
+            + comments
+            + shares
+            + saves
+        )
+
+        performance = determine_post_performance(
+            engagement_rate
+        )
+
+        posts.append({
+            "title": title,
+            "likes": likes,
+            "comments": comments,
+            "shares": shares,
+            "saves": saves,
+            "reach": reach,
+            "interactions": total_interactions,
+            "engagement_rate": engagement_rate,
+            "performance": performance
+        })
+
+    display_post_comparison(posts)
+
+
+def display_post_comparison(posts):
+    print()
+    print("=" * 80)
+    print("POST COMPARISON")
+    print("=" * 80)
+
+    print(
+        f"{'POST':<25}"
+        f"{'REACH':<10}"
+        f"{'INTERACTIONS':<15}"
+        f"{'ENGAGEMENT':<15}"
+        f"{'PERFORMANCE':<15}"
+    )
+
+    print("-" * 80)
+
+    for post in posts:
+        print(
+            f"{post['title'][:24]:<25}"
+            f"{post['reach']:<10}"
+            f"{post['interactions']:<15}"
+            f"{post['engagement_rate']:.2f}%{'':<10}"
+            f"{post['performance']:<15}"
+        )
+
+    print("=" * 80)
+
+    best_post = max(
+        posts,
+        key=lambda post: post["engagement_rate"]
+    )
+
+    total_engagement = sum(
+        post["engagement_rate"]
+        for post in posts
+    )
+
+    average_engagement = (
+        total_engagement / len(posts)
+    )
+
+    print()
+    print("COMPARISON SUMMARY")
+    print("-" * 30)
+
+    print(f"Posts Compared:       {len(posts)}")
+    print(f"Average Engagement:   {average_engagement:.2f}%")
+    print(f"Best Performing Post: {best_post['title']}")
+    print(
+        f"Best Engagement Rate: "
+        f"{best_post['engagement_rate']:.2f}%"
+    )
+
+    print()
+    print("CONTENT INSIGHT")
+    print("-" * 30)
+
+    print(
+        f"'{best_post['title']}' generated the highest "
+        "engagement rate among the posts analyzed."
+    )
+
+    print(
+        "Consider studying its topic, format, hook, "
+        "caption, and audience response."
+    )
+
+    print("=" * 80)
 
 
 def analyze_account():
@@ -493,6 +617,11 @@ def main():
         help="Analyze individual post performance"
     )
 
+    subparsers.add_parser(
+        "compare",
+        help="Compare multiple posts"
+    )
+
     args = parser.parse_args()
 
     display_banner()
@@ -502,6 +631,9 @@ def main():
 
     elif args.command == "post":
         analyze_post()
+
+    elif args.command == "compare":
+        compare_posts()
 
     else:
         parser.print_help()
