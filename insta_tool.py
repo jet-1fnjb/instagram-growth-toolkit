@@ -13,10 +13,14 @@ Version: 0.1
 """
 
 import argparse
+from datetime import datetime
+from pathlib import Path
 
 
 TOOL_NAME = "Instagram Growth & Analytics Toolkit"
 VERSION = "0.1"
+
+REPORTS_DIR = Path("reports")
 
 
 def display_banner():
@@ -225,13 +229,15 @@ def generate_content_insight(
     if strongest == "Saves":
         return (
             "Saves are the strongest interaction. Consider "
-            "creating more educational, useful, or reference-style content."
+            "creating more educational, useful, or "
+            "reference-style content."
         )
 
     if strongest == "Shares":
         return (
             "Shares are the strongest interaction. Consider "
-            "creating more relatable, entertaining, or highly shareable content."
+            "creating more relatable, entertaining, or "
+            "highly shareable content."
         )
 
     if strongest == "Comments":
@@ -246,55 +252,103 @@ def generate_content_insight(
     )
 
 
-def display_account_information(
-    account_name,
-    followers,
-    following,
-    posts,
+def build_post_report(
+    post_title,
     likes,
-    comments
+    comments,
+    shares,
+    saves,
+    reach,
+    engagement_rate,
+    performance
 ):
-    print()
-    print("=" * 50)
-    print("ACCOUNT INFORMATION")
-    print("=" * 50)
+    total_interactions = likes + comments + shares + saves
 
-    print(f"Account:          {account_name}")
-    print(f"Followers:        {followers}")
-    print(f"Following:        {following}")
-    print(f"Posts:            {posts}")
-    print(f"Likes:            {likes}")
-    print(f"Comments:         {comments}")
+    like_rate = calculate_interaction_rate(likes, reach)
+    comment_rate = calculate_interaction_rate(comments, reach)
+    share_rate = calculate_interaction_rate(shares, reach)
+    save_rate = calculate_interaction_rate(saves, reach)
 
-    print("=" * 50)
+    recommendation = get_post_recommendation(performance)
+
+    insight = generate_content_insight(
+        likes,
+        comments,
+        shares,
+        saves
+    )
+
+    timestamp = datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+
+    report = f"""
+==================================================
+INSTAGRAM POST PERFORMANCE REPORT
+==================================================
+
+Generated: {timestamp}
+
+Post:               {post_title}
+
+--------------------------------------------------
+POST METRICS
+--------------------------------------------------
+
+Likes:              {likes}
+Comments:           {comments}
+Shares:             {shares}
+Saves:              {saves}
+Reach:              {reach}
+Total Interactions: {total_interactions}
+
+--------------------------------------------------
+ENGAGEMENT ANALYSIS
+--------------------------------------------------
+
+Engagement Rate:    {engagement_rate:.2f}%
+Performance:        {performance}
+
+--------------------------------------------------
+INTERACTION RATES
+--------------------------------------------------
+
+Like Rate:          {like_rate:.2f}%
+Comment Rate:       {comment_rate:.2f}%
+Share Rate:         {share_rate:.2f}%
+Save Rate:          {save_rate:.2f}%
+
+--------------------------------------------------
+RECOMMENDATION
+--------------------------------------------------
+
+{recommendation}
+
+--------------------------------------------------
+CONTENT INSIGHT
+--------------------------------------------------
+
+{insight}
+
+==================================================
+END OF REPORT
+==================================================
+"""
+
+    return report
 
 
-def display_engagement_analysis(engagement_rate):
-    print()
-    print("=" * 50)
-    print("ENGAGEMENT ANALYSIS")
-    print("=" * 50)
+def save_report(filename, content):
+    REPORTS_DIR.mkdir(exist_ok=True)
 
-    print(f"Engagement Rate:  {engagement_rate:.2f}%")
+    report_path = REPORTS_DIR / filename
 
-    print("=" * 50)
+    report_path.write_text(
+        content,
+        encoding="utf-8"
+    )
 
-
-def display_account_metrics(
-    average_likes,
-    average_comments,
-    average_interactions
-):
-    print()
-    print("=" * 50)
-    print("ACCOUNT METRICS")
-    print("=" * 50)
-
-    print(f"Average Likes/Post:    {average_likes:.2f}")
-    print(f"Average Comments/Post: {average_comments:.2f}")
-    print(f"Average Interactions:  {average_interactions:.2f}")
-
-    print("=" * 50)
+    return report_path
 
 
 def display_post_analysis(
@@ -366,6 +420,180 @@ def display_post_analysis(
     print("=" * 50)
 
 
+def build_comparison_report(posts):
+    best_post = max(
+        posts,
+        key=lambda post: post["engagement_rate"]
+    )
+
+    average_engagement = (
+        sum(
+            post["engagement_rate"]
+            for post in posts
+        )
+        / len(posts)
+    )
+
+    timestamp = datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+
+    lines = []
+
+    lines.append("=" * 80)
+    lines.append("INSTAGRAM POST COMPARISON REPORT")
+    lines.append("=" * 80)
+    lines.append("")
+    lines.append(f"Generated: {timestamp}")
+    lines.append("")
+
+    lines.append("-" * 80)
+    lines.append("POST COMPARISON")
+    lines.append("-" * 80)
+
+    lines.append(
+        f"{'POST':<25}"
+        f"{'REACH':<10}"
+        f"{'INTERACTIONS':<15}"
+        f"{'ENGAGEMENT':<15}"
+        f"{'PERFORMANCE':<15}"
+    )
+
+    lines.append("-" * 80)
+
+    for post in posts:
+        lines.append(
+            f"{post['title'][:24]:<25}"
+            f"{post['reach']:<10}"
+            f"{post['interactions']:<15}"
+            f"{post['engagement_rate']:.2f}%{'':<10}"
+            f"{post['performance']:<15}"
+        )
+
+    lines.append("")
+    lines.append("-" * 80)
+    lines.append("COMPARISON SUMMARY")
+    lines.append("-" * 80)
+
+    lines.append(
+        f"Posts Compared:       {len(posts)}"
+    )
+
+    lines.append(
+        f"Average Engagement:   "
+        f"{average_engagement:.2f}%"
+    )
+
+    lines.append(
+        f"Best Performing Post: "
+        f"{best_post['title']}"
+    )
+
+    lines.append(
+        f"Best Engagement Rate: "
+        f"{best_post['engagement_rate']:.2f}%"
+    )
+
+    lines.append("")
+    lines.append("-" * 80)
+    lines.append("CONTENT INSIGHT")
+    lines.append("-" * 80)
+
+    lines.append(
+        f"'{best_post['title']}' generated the highest "
+        "engagement rate among the posts analyzed."
+    )
+
+    lines.append(
+        "Consider studying its topic, format, hook, "
+        "caption, and audience response."
+    )
+
+    lines.append("")
+    lines.append("=" * 80)
+    lines.append("END OF REPORT")
+    lines.append("=" * 80)
+
+    return "\n".join(lines)
+
+
+def display_post_comparison(posts):
+    print()
+    print("=" * 80)
+    print("POST COMPARISON")
+    print("=" * 80)
+
+    print(
+        f"{'POST':<25}"
+        f"{'REACH':<10}"
+        f"{'INTERACTIONS':<15}"
+        f"{'ENGAGEMENT':<15}"
+        f"{'PERFORMANCE':<15}"
+    )
+
+    print("-" * 80)
+
+    for post in posts:
+        print(
+            f"{post['title'][:24]:<25}"
+            f"{post['reach']:<10}"
+            f"{post['interactions']:<15}"
+            f"{post['engagement_rate']:.2f}%{'':<10}"
+            f"{post['performance']:<15}"
+        )
+
+    print("=" * 80)
+
+    best_post = max(
+        posts,
+        key=lambda post: post["engagement_rate"]
+    )
+
+    average_engagement = (
+        sum(
+            post["engagement_rate"]
+            for post in posts
+        )
+        / len(posts)
+    )
+
+    print()
+    print("COMPARISON SUMMARY")
+    print("-" * 30)
+
+    print(f"Posts Compared:       {len(posts)}")
+    print(
+        f"Average Engagement:   "
+        f"{average_engagement:.2f}%"
+    )
+
+    print(
+        f"Best Performing Post: "
+        f"{best_post['title']}"
+    )
+
+    print(
+        f"Best Engagement Rate: "
+        f"{best_post['engagement_rate']:.2f}%"
+    )
+
+    print()
+    print("CONTENT INSIGHT")
+    print("-" * 30)
+
+    print(
+        f"'{best_post['title']}' generated the highest "
+        "engagement rate among the posts analyzed."
+    )
+
+    print(
+        "Consider studying its topic, format, hook, "
+        "caption, and audience response."
+    )
+
+    print("=" * 80)
+
+
 def compare_posts():
     print()
     print("Multiple Post Comparison")
@@ -434,75 +662,21 @@ def compare_posts():
 
     display_post_comparison(posts)
 
+    report = build_comparison_report(posts)
 
-def display_post_comparison(posts):
-    print()
-    print("=" * 80)
-    print("POST COMPARISON")
-    print("=" * 80)
-
-    print(
-        f"{'POST':<25}"
-        f"{'REACH':<10}"
-        f"{'INTERACTIONS':<15}"
-        f"{'ENGAGEMENT':<15}"
-        f"{'PERFORMANCE':<15}"
+    filename = (
+        "comparison_"
+        + datetime.now().strftime("%Y%m%d_%H%M%S")
+        + ".txt"
     )
 
-    print("-" * 80)
-
-    for post in posts:
-        print(
-            f"{post['title'][:24]:<25}"
-            f"{post['reach']:<10}"
-            f"{post['interactions']:<15}"
-            f"{post['engagement_rate']:.2f}%{'':<10}"
-            f"{post['performance']:<15}"
-        )
-
-    print("=" * 80)
-
-    best_post = max(
-        posts,
-        key=lambda post: post["engagement_rate"]
-    )
-
-    total_engagement = sum(
-        post["engagement_rate"]
-        for post in posts
-    )
-
-    average_engagement = (
-        total_engagement / len(posts)
+    report_path = save_report(
+        filename,
+        report
     )
 
     print()
-    print("COMPARISON SUMMARY")
-    print("-" * 30)
-
-    print(f"Posts Compared:       {len(posts)}")
-    print(f"Average Engagement:   {average_engagement:.2f}%")
-    print(f"Best Performing Post: {best_post['title']}")
-    print(
-        f"Best Engagement Rate: "
-        f"{best_post['engagement_rate']:.2f}%"
-    )
-
-    print()
-    print("CONTENT INSIGHT")
-    print("-" * 30)
-
-    print(
-        f"'{best_post['title']}' generated the highest "
-        "engagement rate among the posts analyzed."
-    )
-
-    print(
-        "Consider studying its topic, format, hook, "
-        "caption, and audience response."
-    )
-
-    print("=" * 80)
+    print(f"[+] Report saved to: {report_path}")
 
 
 def analyze_account():
@@ -537,24 +711,44 @@ def analyze_account():
         posts
     )
 
-    display_account_information(
-        account_name,
-        followers,
-        following,
-        posts,
-        likes,
-        comments
+    print()
+    print("=" * 50)
+    print("ACCOUNT INFORMATION")
+    print("=" * 50)
+
+    print(f"Account:              {account_name}")
+    print(f"Followers:            {followers}")
+    print(f"Following:            {following}")
+    print(f"Posts:                {posts}")
+    print(f"Likes:                {likes}")
+    print(f"Comments:             {comments}")
+
+    print()
+    print("=" * 50)
+    print("ACCOUNT ANALYSIS")
+    print("=" * 50)
+
+    print(
+        f"Engagement Rate:      "
+        f"{engagement_rate:.2f}%"
     )
 
-    display_engagement_analysis(
-        engagement_rate
+    print(
+        f"Average Likes/Post:   "
+        f"{average_likes:.2f}"
     )
 
-    display_account_metrics(
-        average_likes,
-        average_comments,
-        average_interactions
+    print(
+        f"Average Comments/Post:"
+        f" {average_comments:.2f}"
     )
+
+    print(
+        f"Average Interactions: "
+        f"{average_interactions:.2f}"
+    )
+
+    print("=" * 50)
 
 
 def analyze_post():
@@ -589,6 +783,31 @@ def analyze_post():
         engagement_rate,
         performance
     )
+
+    report = build_post_report(
+        post_title,
+        likes,
+        comments,
+        shares,
+        saves,
+        reach,
+        engagement_rate,
+        performance
+    )
+
+    filename = (
+        "post_"
+        + datetime.now().strftime("%Y%m%d_%H%M%S")
+        + ".txt"
+    )
+
+    report_path = save_report(
+        filename,
+        report
+    )
+
+    print()
+    print(f"[+] Report saved to: {report_path}")
 
 
 def main():
