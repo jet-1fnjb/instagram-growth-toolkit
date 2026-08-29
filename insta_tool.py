@@ -80,6 +80,29 @@ def calculate_engagement_rate(followers, likes, comments):
     return (interactions / followers) * 100
 
 
+def calculate_average_likes(likes, posts):
+    if posts == 0:
+        return 0.0
+
+    return likes / posts
+
+
+def calculate_average_comments(comments, posts):
+    if posts == 0:
+        return 0.0
+
+    return comments / posts
+
+
+def calculate_average_interactions(likes, comments, posts):
+    if posts == 0:
+        return 0.0
+
+    interactions = likes + comments
+
+    return interactions / posts
+
+
 def display_account_information(
     account_name,
     followers,
@@ -114,6 +137,23 @@ def display_engagement_analysis(engagement_rate):
     print("=" * 50)
 
 
+def display_account_metrics(
+    average_likes,
+    average_comments,
+    average_interactions
+):
+    print()
+    print("=" * 50)
+    print("ACCOUNT METRICS")
+    print("=" * 50)
+
+    print(f"Average Likes/Post:   {average_likes:.2f}")
+    print(f"Average Comments/Post:{average_comments:.2f}")
+    print(f"Average Interactions: {average_interactions:.2f}")
+
+    print("=" * 50)
+
+
 def analyze_account():
     (
         account_name,
@@ -130,6 +170,22 @@ def analyze_account():
         comments
     )
 
+    average_likes = calculate_average_likes(
+        likes,
+        posts
+    )
+
+    average_comments = calculate_average_comments(
+        comments,
+        posts
+    )
+
+    average_interactions = calculate_average_interactions(
+        likes,
+        comments,
+        posts
+    )
+
     display_account_information(
         account_name,
         followers,
@@ -139,7 +195,15 @@ def analyze_account():
         comments
     )
 
-    display_engagement_analysis(engagement_rate)
+    display_engagement_analysis(
+        engagement_rate
+    )
+
+    display_account_metrics(
+        average_likes,
+        average_comments,
+        average_interactions
+    )
 
 
 def main():
